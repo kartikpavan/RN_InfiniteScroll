@@ -1,15 +1,37 @@
-import { FlatList } from "react-native";
-import character from "../data/character.json";
+import { ActivityIndicator, FlatList } from "react-native";
 import SingleCharacter from "./SingleCharacter";
+import { useEffect, useState } from "react";
 
 const MyList = () => {
-  // return <CharacterListItem character={character.results[0]} />;
+  const [items, setItems] = useState([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      try {
+        setIsLoading(true);
+        const response = await fetch(
+          "https://rickandmortyapi.com/api/character"
+        );
+        const data = await response.json();
+        setItems(data.results);
+      } catch (error) {
+        if (error instanceof Error) console.log(error.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchItems();
+  }, []);
+
+  if (isLoading) {
+    return <ActivityIndicator />;
+  }
+
   return (
     <FlatList
-      data={character.results}
-      renderItem={({ item, index }) => {
-        return <SingleCharacter character={item} />;
-      }}
+      data={items}
+      renderItem={({ item, index }) => <SingleCharacter character={item} />}
       contentContainerStyle={{ gap: 10 }}
     />
   );
