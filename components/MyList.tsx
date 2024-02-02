@@ -2,20 +2,18 @@ import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import SingleCharacter from "./SingleCharacter";
 import { useEffect, useState } from "react";
 
+const initialPageURL = "https://rickandmortyapi.com/api/character";
+
 const MyList = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [items, setItems] = useState<any[]>([]);
-  const [nextPageURL, setNextPageURL] = useState<string>(
-    "https://rickandmortyapi.com/api/character"
-  );
+  const [nextPageURL, setNextPageURL] = useState<string>("");
 
-  const fetchItems = async () => {
+  const fetchItems = async (url: string) => {
     if (isLoading) return; // if loading don't fetch
-
-    console.log(nextPageURL);
     try {
       setIsLoading(true);
-      const response = await fetch(nextPageURL);
+      const response = await fetch(url);
       const data = await response.json();
       setItems((prev) => {
         return [...prev, ...data.results];
@@ -28,9 +26,17 @@ const MyList = () => {
     }
   };
 
-  // on Component Mount
+  // Pull down to refresh
+  const onRefresh = () => {
+    // reset data
+    setItems([]);
+    setNextPageURL(initialPageURL);
+    fetchItems(initialPageURL);
+  };
+
+  // on Component Mount fetch data with intialPageURL
   useEffect(() => {
-    fetchItems();
+    fetchItems(initialPageURL);
   }, []);
 
   return (
@@ -38,8 +44,10 @@ const MyList = () => {
       data={items}
       renderItem={({ item, index }) => <SingleCharacter character={item} />}
       keyExtractor={(item) => item.id.toString()}
-      onEndReached={fetchItems}
+      onEndReached={() => fetchItems(nextPageURL)}
       onEndReachedThreshold={2}
+      refreshing={isLoading}
+      onRefresh={onRefresh}
       ListFooterComponent={() => isLoading && <ActivityIndicator />}
       contentContainerStyle={{ gap: 10 }}
       numColumns={2}
