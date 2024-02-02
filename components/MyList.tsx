@@ -10,6 +10,9 @@ const MyList = () => {
   );
 
   const fetchItems = async () => {
+    if (isLoading) return; // if loading don't fetch
+
+    console.log(nextPageURL);
     try {
       setIsLoading(true);
       const response = await fetch(nextPageURL);
@@ -25,8 +28,8 @@ const MyList = () => {
     }
   };
 
+  // on Component Mount
   useEffect(() => {
-    // On mount ,fetch items
     fetchItems();
   }, []);
 
@@ -35,17 +38,8 @@ const MyList = () => {
       data={items}
       renderItem={({ item, index }) => <SingleCharacter character={item} />}
       contentContainerStyle={{ gap: 10 }}
-      ListFooterComponent={() => (
-        <View>
-          {isLoading && <ActivityIndicator />}
-          <Text
-            onPress={fetchItems} // on press fetch More items
-            style={{ textAlign: "center", fontSize: 20, color: "green" }}
-          >
-            Load More
-          </Text>
-        </View>
-      )}
+      onEndReached={fetchItems}
+      ListFooterComponent={() => isLoading && <ActivityIndicator />}
     />
   );
 };
