@@ -28,6 +28,7 @@ const MyList = () => {
 
   // Pull down to refresh
   const onRefresh = () => {
+    if (isLoading) return;
     // reset data
     setItems([]);
     setNextPageURL(initialPageURL);
@@ -43,11 +44,18 @@ const MyList = () => {
     <FlatList
       data={items}
       renderItem={({ item, index }) => <SingleCharacter character={item} />}
-      keyExtractor={(item) => item.id.toString()}
+      keyExtractor={(item, index) => `${item.name}-${index}`}
       onEndReached={() => fetchItems(nextPageURL)}
       onEndReachedThreshold={2}
       refreshing={isLoading}
       onRefresh={onRefresh}
+      viewabilityConfig={{
+        minimumViewTime: 500, // consider item visible after 500ms on screen
+        itemVisiblePercentThreshold: 50, // if half of the item is visible in the screen , we consider it visible
+      }}
+      onViewableItemsChanged={({ changed, viewableItems }) => {
+        changed.forEach((item) => item.isViewable);
+      }}
       ListFooterComponent={() => isLoading && <ActivityIndicator />}
       contentContainerStyle={{ gap: 10 }}
       numColumns={2}
