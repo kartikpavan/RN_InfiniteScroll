@@ -37,9 +37,12 @@ const MyList = () => {
     <FlatList
       data={items}
       renderItem={({ item, index }) => <SingleCharacter character={item} />}
-      contentContainerStyle={{ gap: 10 }}
+      keyExtractor={(item) => item.id.toString()}
       onEndReached={fetchItems}
+      onEndReachedThreshold={2}
       ListFooterComponent={() => isLoading && <ActivityIndicator />}
+      contentContainerStyle={{ gap: 10 }}
+      numColumns={2}
     />
   );
 };
